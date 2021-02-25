@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+	<style>
+	
+		body {
+			box-sizing: border-box;
+			background-color: beige;
+			margin: 1rem 2rem;
+			padding: 0 4rem;
+			border: solid 2px grey;
+			border-radius: 1rem;
+			box-shadow: 0 0 8px 2px rgb(201, 197, 196);
+			
+		}
+		h1{
+			width: 100%;
+			text-align: center;
+			font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+			font-size: 3rem;
+		}
+		p{
+			font-size: 1.3rem;
+			font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+			color:darkslategray
+		}
+		pre {
+			width: 100%;
+			border: solid rgb(51, 47, 47) 1px;
+			overflow: auto;
+		}
+		code {
+			padding: 1rem;
+			width: 100%;
+			font-size: 1.8rem;
+			font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+			color: rgb(11, 52, 128);
+			overflow-wrap: break-word;
+		}
+	
+	</style>
+</head>
+<body>
+	<h1>Promises in JS</h1>
+	<p>Promises are one of the ways we can deal with asynchronous operations in JavaScript.</p>
+	<p>Promises accept a function as parameter. The function passed to new Promise is called the executor. When new Promise is created, the executor runs automatically and immediately , to summarize: the executor runs automatically and immediately  and attempts to perform a job. </p>
+	<p>An executor usually does something asynchronously and calls resolve/reject after some time</p>
+	<p>That function in turn accepts two parameters,a first one to RESOLVE and a second one to REJECT the promise, RESOLVE and REJECT are callbacks provided by JavaScript itself. These functions are pre-defined by the JavaScript engine, so we don’t need to create them. </p>
+	<pre><code>
+		new Promise(function(resolve,reject){
+						// do a lot of stuff or not, tries to perform a job then call
+						resolve or reject 
+						}
+					)
+					</code></pre>
+	<p>resolve(value) — if the job finished successfully, with result value</p>
+	<p>reject(error) — if an error occurred, error is the error object</p>
+	<p>The promise will be REJECTED if any mistakes happen inside a promise</p>
+	<p>The executor should call only one resolve or one reject</p>
+	<p>The idea is that a job done by the executor may have only one result or an error.Also, resolve/reject expect only one argument (or none) and will ignore additional arguments.</p>
+	<p>A promise has these main methods: then(), catch() and finally() this comes from the promise interface called thenable, this is how you access the results of a promise. </p>
+	<p>When we RESOLVE a promise we can pass a parameter to the resolver function that will appear in the then() method </p>
+	<p>When we REJECT a promise we can pass a parameter to the reject function that will appear in the catch() method or in the second argument of the then() method, more below.</p>
+	<p>The RESOLVE and REJECT function can only be executed once inside the promise but the method then() can be called multiple times </p>
+	<p>If a promise has already been RESOLVED,any calls to the then() method will yeld the same results</p>
+	<p>You cannot just: let mypromise = new Promise(), it will give you a error that a executor is missing</p>
+	<p>So it needs at least one parameter, the so called executor function: usually anonymous, this is the body of the promise, and it takes 2 more parameters, a function to return the resolved promise and a second function to return a error in case of a rejectd promise  if a condition that you choose if fullfilled, like is there any data back from a fetch call? or does some variable exists? or some variable is of certain type? then just call the resolver function, with the final data to be returned inside, the results, like a string, a object, an array, another function whatever</p>
+	<pre><code>
+		new Promise( //this is the executor function, much easier to do it 
+		as a arrow function// (//here goes the resolver, call it whatever 
+		you want// RESOLVE, //here goes the reject function, call it whatever 
+		you want// REJECT) => {
+			let condition = 'success'
+			if(condition === 'success'){
+				RESOLVE(//results for the success//)
+			} else {
+				REJECT(//results for the error, usually a new Error//)
+			}
+
+		})
+	</code></pre>
+	<p>Crazy random thoughts section --> so when I call the function that returns a promise, the promise is run but the code keeps going outside because promises are async, so when the promise is returned it is like it is activaded, invoked, then the outside code keeps on going</p>
+	<p>Crazy random thoughts section --> so in the end you can just treat this new Promise stuff just like any other function, until you MANUALLY call resolve or reject it will never do anything other than the stuff in the body of this first function, so it behaves like any other function, if you make a api call here it will make the call whenever you call this function</p>
+	<p>So the first argument of .then is a function that runs when the promise is resolved, and receives the result. The second argument of .then is a function that runs when the promise is rejected, and receives the error.</p>
+	<p>The call .catch(f) is a complete analog of .then(null, f), it’s just a shorthand, these are for the reject calls in the executor.</p>
+	<p>The finaly() function will be called anyway, resolved or rejected, success or error, dosent matter, it is a good place to do some cleanup stuff etc... or to do some intermediate stuff because the success results or the errors will pass through the finally function to the next then() or catch() method, so yes, you can keep chaining then, catch and finally functions.</p>
+	<p>The finally function is not meant to process a promise result. So it passes it through.</p>
+	<p>So a little bit of background, callbacks and closure</p>
+	<p>In JavaScript, if you use the function keyword inside another function, you are creating a closure</p>
+	<p>So callbacks:</p>
+	<pre><code>
+		function loadingScripts(src){
+			let script = document.createElement('script')
+			script.src = src
+			document.head.append(script);
+		}
+	</code></pre>
+	<p>calling this will do this normally, create script tag, add src and add to head element, but it dosen't tell when the script finishs loading by the browser, so if we need to use something from the script just below this functins it will problably break, so we need a callback, from javascript.info
+	</p>
+	<p>So this below would be the example using the concept of a callback, when some action is done (here would be finish loading script), 'call me back' so I can continue my job.</p>
+	<pre><code>
+// ./index.js
+function tellWhenFinishLoading(src, cb) {
+    let script = document.createElement('script')
+    script.src = src
+    console.log('before script onload, happens 1') //happens 1
+    script.onload = () => cb(null) //call me back after script loads this is async
+	script.onerror = () => cb(new Error(`Throwing error for loading fail for ${src}`));
+    document.head.append(script)
+    console.log('after appen head, happens 2') //happens 2
+}
+
+function callmeback(error) {
+	if(error){
+		alert(error)
+		//handle error code
+	} else {
+		functionFromScript()
+		//handle load script success
+	} 
+}
+
+tellWhenFinishLoading('./script.js', callback)
+
+// ./script.js
+function functionFromScript() {
+    console.log(
+        'since the script is loaded, I can use everything from it safely now, happens 3' //happens 3
+    )
+}
+</code></pre>
+	<p>That’s called a “callback-based” style of asynchronous programming. from javascript.info</p>
+	<p>Crazy random tougths --->  To me, the tricky part is identifying always the actual async part, so you can put a call to a callback function right after.</p>
+	<p>This sort of error handling callbacks it’s called the “error-first callback” style</p>
+	<p>So back to promises</p>
+	<p>So this is the callback function as a promise</p>
+	<pre><code>
+		function loadScriptsPromise(src) {
+			//this is with Promise
+			return new Promise((resolve, reject) => {
+				let script = document.createElement('script')
+				script.src = src
+				script.onload = resolve() //this will not work, it needs to be a function ()=>resolve()
+				script.onerror = reject(new Error('fuck off')) //this will not work, it needs to be a function ()=>reject()
+				document.head.append(script)
+			})
+		}
+		loadScriptsPromise('./script.js').then(() => console.log('then method called'))
+	</code></pre>
+	<p>Promises chaining: The idea is that the result is passed through the chain of .then handlers. Call to .then() with return results, so the next .then() will have the results.</p>
+	<p>So the .then may create and return a promise like this:</p>
+	<pre><code>
+		.then(function(result) {
+
+			alert(result); // 1
+		  
+			return new Promise((resolve, reject) => { // (*)
+			  setTimeout(() => resolve(result * 2), 1000);
+			});
+		  
+		  })
+	</code></pre>
+	<p>So if you use a return statement in a .then() what is really happening underneath the surface is that the .then method is putting whatever is that you are returning inside a resolver method inside a new Promise. It is basically a shorthand, like this:</p>
+	<pre><code>.then(function(result) {
+
+		alert(result); // 1
+	  
+		return result * 2 // here is actually return new Promise((resolve,reject)=>resolve(result*2))
+		});
+	  
+	  })</code></pre>
+	<p>In reality, .then() does not return a promise,it actually returns a so-called “thenable” object – an arbitrary object that has a method .then, here is an example of a thenable object :</p>
+	<pre><code>
+		class Thenable {
+			constructor(num) {
+			  this.num = num;
+			}
+			then(resolve, reject) {
+			  alert(resolve); // function() { native code }
+			  // resolve with this.num*2 after the 1 second
+			  setTimeout(() => resolve(this.num * 2), 1000); // (**)
+			}
+		  }
+		  
+		  new Promise(resolve => resolve(1))
+			.then(result => {
+			  return new Thenable(result); // (*)
+			})
+			.then(alert); // shows 2 after 1000ms
+	</code></pre>
+	<p>This is what the .then() returns, this is made like this so 3rd party libraries can implement some of their own methos in a object thenable</p>
+	<p>JavaScript checks the object returned by the .then, if it has a callable method named then, then it calls that method providing native functions resolve, reject as arguments, and, as in a promise, it waits until its resolved or rejectd by the calling of resolve or reject methods, respectively, passing the results further down the chain.</p>
+	<p>The call of .then(handler) always returns a 'promise'</p>
+	<p>So errors handling, you can chain .then().catch().then().catch() that the next catch in line will handle an error and you can handle normally a error with the function in the catch and just pass a result to the next then(), I mean you can just do normal stuff inside a catch method and if you dont throw another error the execution will continue on and on. Inside the executors of the promises and thens and catchs the way that the error is catch is actually with a try catch block, just a curiosity.</p>
+	<p>Now, the .then, .catch and .finally are async, so any code below these lines will execute before whats inside them.</p>
+	<p>Asynchronous tasks need proper management. For that, the ECMA standard specifies an internal queue PromiseJobs, more often referred to as the “microtask queue” (V8 term).</p>
+	<p>The queue is FIFO and is only executed when nothing else is running</p>
+	<p>So when a promised is finished the engine put the resulted method in the queue, they are not runned now and only when the engine is free from the current code is that it will take one method from the queue and run it</p>
+	<p>Promise handlers always go through this internal queue.</p>
+	<p></p>
+	<p></p>
+	<p></p>
+	<p></p>
+	<p></p>
+	<p></p>
+	<p></p>
+	<p></p>
+	<p></p>
+	<p></p>
+	<p></p>
+	<script src="index.js"></script>
+</body>
+</html>
